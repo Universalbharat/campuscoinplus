@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CampusCoin+ Enhanced Interactive</title>
+  <style>
+    /* Reset & Base */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      display:flex; justify-content:center; align-items:center;
+      min-height:100vh;
+    }
+    .phone-container {
+      width:375px; height:812px; background:#000;
+      border-radius:40px; padding:8px; overflow:hidden;
+      box-shadow:0 20px 40px rgba(0,0,0,0.3);
+      position:relative;
+    }
+    .screen { background:#fff; border-radius:32px; height:100%; overflow-y:auto; }
+    .status-bar {
+      height:44px; background:#f8f9fa; display:flex;
+      justify-content:space-between; align-items:center;
+      padding:0 20px; font-size:14px; font-weight:600;
+    }
+    .app-content { padding:20px; }
+    .header {
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:20px;
+    }
+    .logo { font-size:24px; color:#667eea; font-weight:700; }
+    .settings-icon { font-size:20px; cursor:pointer; }
+    /* Cards */
+    .card {
+      border-radius:20px; padding:20px; color:#fff;
+      margin-bottom:20px; position:relative;
+    }
+    .card.green { background:linear-gradient(135deg,#28a745 0%,#20c997 100%); }
+    .card.blue { background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); }
+    .card.orange { background:linear-gradient(135deg,#fb8500 0%,#8ecae6 100%); }
+    .card.purple { background:linear-gradient(135deg,#4b5293 0%,#72026a 100%); }
+    .card-title { font-size:16px; opacity:0.9; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+    .card-amount { font-size:28px; font-weight:700; margin-bottom:10px; }
+    .progress-bar {
+      background:rgba(255,255,255,0.2); height:8px;
+      border-radius:4px; overflow:hidden; margin-bottom:10px;
+    }
+    .progress-fill { background:#fff; height:100%; width:40%; }
+    /* Quick Actions */
+    .quick-actions {
+      display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;
+      margin-bottom:20px;
+    }
+    .action-btn {
+      background:#f8f9fa; border:none; border-radius:15px;
+      padding:15px; text-align:center; cursor:pointer;
+      transition:0.2s;
+    }
+    .action-btn:hover { background:#e9ecef; transform:translateY(-2px); }
+    .action-icon { font-size:28px; margin-bottom:5px; }
+    .action-text { font-size:14px; font-weight:600; }
+    /* Transactions */
+    .section-title {
+      font-size:18px; font-weight:700; color:#343a40;
+      margin:20px 0 10px;
+    }
+    .transaction-list {
+      background:#f8f9fa; border-radius:15px; padding:15px;
+    }
+    .transaction-item {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:10px 0; border-bottom:1px solid #e9ecef;
+      cursor:pointer;
+    }
+    .transaction-item:last-child { border-bottom:none; }
+    .transaction-info { display:flex; align-items:center; gap:10px; }
+    .transaction-icon {
+      width:36px; height:36px; border-radius:18px;
+      background:#e9ecef; display:flex;
+      align-items:center; justify-content:center; font-size:18px;
+    }
+    .transaction-details h4 { font-size:14px; color:#343a40; }
+    .transaction-details p { font-size:12px; color:#6c757d; }
+    .transaction-amount { font-size:16px; font-weight:600; }
+    /* Group Activity */
+    .group-activity { background:#e7f3ff; border-radius:15px; padding:15px; }
+    .activity-item { display:flex; align-items:center; gap:8px; padding:8px 0; }
+    .activity-icon { font-size:16px; }
+    .activity-text { font-size:14px; color:#495057; }
+    /* Feedback Cards */
+    .feedback-card {
+      border-radius:15px; padding:15px; margin-bottom:15px;
+      cursor:pointer; transition:0.2s;
+    }
+    .feedback-card:hover { opacity:0.9; }
+    .feedback-icon { font-size:24px; margin-bottom:6px; }
+    .feedback-title { font-size:16px; font-weight:700; margin-bottom:4px; }
+    /* Modal */
+    .modal {
+      display:none; position:fixed; top:0; left:0; right:0; bottom:0;
+      background:rgba(0,0,0,0.5); justify-content:center; align-items:center;
+      z-index:1000;
+    }
+    .modal-content {
+      background:#fff; border-radius:15px; padding:20px;
+      width:90%; max-width:320px; max-height:80%; overflow-y:auto;
+      position:relative;
+      box-shadow:0 10px 24px rgba(0,0,0,0.2);
+    }
+    .modal-close {
+      position:absolute; top:10px; right:10px; cursor:pointer;
+      font-size:18px; color:#666;
+    }
+    .modal-title {
+      font-size:18px; font-weight:700; margin-bottom:10px;
+      display:flex; align-items:center; gap:6px;
+    }
+    .modal-body p {
+      margin:8px 0; font-size:14px; color:#333;
+      line-height:1.4;
+    }
+    .modal-body .highlight { font-weight:600; }
+    .modal-body ul { margin-left:20px; }
+    .modal-body li { margin-bottom:6px; }
+    /* Form styling for new modals */
+    .modal-form label { display:block; margin:10px 0 4px; font-size:14px; color:#333; }
+    .modal-form input, .modal-form select, .modal-form textarea {
+      width:100%; padding:10px; margin-bottom:10px; border:1px solid #dee2e6; border-radius:10px; font-size:14px;
+      background:#fff;
+    }
+    .btn-primary {
+      width:100%; padding:12px; border:none; border-radius:10px;
+      background:#667eea; color:#fff; font-size:15px; font-weight:700; cursor:pointer;
+    }
+    .btn-primary:hover { background:#5a67d8; }
+    .btn-secondary {
+      width:100%; padding:10px; border:none; border-radius:10px; margin-top:8px;
+      background:#f1f3f5; color:#333; font-size:14px; cursor:pointer;
+    }
+    .btn-secondary:hover { background:#e9ecef; }
+    .inline-row { display:flex; gap:10px; }
+    .chip {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:6px 10px; border-radius:999px; background:#eef2ff; color:#3b5bdb; font-size:12px; margin:4px 6px 0 0;
+    }
+    .chip button {
+      border:none; background:transparent; cursor:pointer; color:#3b5bdb; font-size:14px;
+    }
+    .contacts-panel {
+      background:#f8f9fa; border:1px dashed #ced4da; border-radius:12px; padding:10px; margin-top:8px;
+      display:none;
+    }
+    .contact-item { padding:8px; border-radius:8px; background:#fff; border:1px solid #e9ecef; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
+    .contact-item button { border:none; background:#e9ecef; padding:6px 10px; border-radius:8px; cursor:pointer; }
+    .contact-item button:hover { background:#dee2e6; }
+  </style>
+</head>
+<body>
+  <div class="phone-container">
+    <div class="screen">
+      <div class="status-bar">
+        <span>10:38</span><span>📶📶📶 🔋</span>
+      </div>
+      <div class="app-content">
+        <div class="header">
+          <div class="logo">🏛️ CampusCoin+</div>
+          <div class="settings-icon">⚙️</div>
+        </div>
+        <!-- Fees Card -->
+        <div class="card blue">
+          <div class="card-title">🏫 Tuition Fees Paid</div>
+          <div class="card-amount">₹5,000 / ₹20,000</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:25%;"></div></div>
+          <div class="card-title" style="font-size:14px;opacity:0.8;">25% of semester fees completed</div>
+        </div>
+        <!-- Savings Target Card -->
+        <div class="card blue">
+          <div class="card-title">🎯 Monthly Savings Target</div>
+          <div class="card-amount">₹400 / ₹1,000</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:40%;"></div></div>
+          <div class="card-title" style="font-size:14px;opacity:0.8;">Saved ₹600 by cutting snacks 🍟</div>
+        </div>
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <button class="action-btn" onclick="openModal('addExpenseModal')">
+            <div class="action-icon">💰</div><div class="action-text">Add Expense</div>
+          </button>
+          <button class="action-btn" onclick="openModal('splitBillModal')">
+            <div class="action-icon">🧾</div><div class="action-text">Split Bill</div>
+          </button>
+          <button class="action-btn" onclick="openModal('lendModal')">
+            <div class="action-icon">🤝</div><div class="action-text">Lend/Borrow</div>
+          </button>
+        </div>
+        <!-- Transactions -->
+        <div class="section-title">Recent Transactions</div>
+        <div class="transaction-list">
+          <div class="transaction-item" onclick="openTransactionDetail('TXN1001','-₹60','Snacks','2025-08-15 13:15')">
+            <div class="transaction-info">
+              <div class="transaction-icon">🍟</div>
+              <div class="transaction-details">
+                <h4>Canteen Snacks</h4>
+                <p>Today, 1:15 PM</p>
+              </div>
+            </div>
+            <div class="transaction-amount">-₹60</div>
+          </div>
+          <div class="transaction-item" onclick="openTransactionDetail('TXN1002','-₹5,000','College Fees','2025-08-15 09:00')">
+            <div class="transaction-info">
+              <div class="transaction-icon">🏫</div>
+              <div class="transaction-details">
+                <h4>College Fees</h4>
+                <p>Today, 9:00 AM</p>
+              </div>
+            </div>
+            <div class="transaction-amount">-₹5,000</div>
+          </div>
+          <div class="transaction-item" onclick="openTransactionDetail('TXN1003','+₹200','Repayment','2025-08-14 18:30')">
+            <div class="transaction-info">
+              <div class="transaction-icon">💸</div>
+              <div class="transaction-details">
+                <h4>Refund from Rahul</h4>
+                <p>Yesterday, 6:30 PM</p>
+              </div>
+            </div>
+            <div class="transaction-amount">+₹200</div>
+          </div>
+        </div>
+        <!-- Group Activity -->
+        <div class="section-title">Group Activity</div>
+        <div class="group-activity">
+          <div class="activity-item">
+            <div class="activity-icon">👥</div>
+            <div class="activity-text">Arjun paid for group dinner – ₹680</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon">💳</div>
+            <div class="activity-text">You owe Priya ₹150 for movie tickets</div>
+          </div>
+        </div>
+        <!-- Feedback Cards -->
+        <div class="card green feedback-card" onclick="openFeedback('savings')">
+          <div class="card-title">🎉 Congratulations!</div>
+          <div class="card-amount" style="font-size:20px;">You hit your saving target!</div>
+          <div>+100 reward points unlocked</div>
+        </div>
+        <div class="card orange feedback-card" onclick="openFeedback('snacks')">
+          <div class="card-title">🍟 Snack Saver</div>
+          <div class="card-amount" style="font-size:20px;">You saved ₹600</div>
+          <div>by cutting snack trips</div>
+        </div>
+        <div class="card purple feedback-card" onclick="openFeedback('gift')">
+          <div class="card-title">🎈 Gift Budget</div>
+          <div class="card-amount" style="font-size:20px;">₹500 budget • ₹200 spent</div>
+          <div>₹300 remaining</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transaction Detail Modal -->
+  <div id="txnModal" class="modal" onclick="closeModal('txnModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <span class="modal-close" onclick="closeModal('txnModal')">×</span>
+      <div class="modal-title">💰 Transaction Details</div>
+      <div class="modal-body">
+        <p><span class="highlight">ID:</span> <span id="txnId"></span></p>
+        <p><span class="highlight">Amount:</span> <span id="txnAmt"></span></p>
+        <p><span class="highlight">Category:</span> <span id="txnCat"></span></p>
+        <p><span class="highlight">Time:</span> <span id="txnTime"></span></p>
+        <hr/>
+        <p><span class="highlight">Savings Progress:</span> 40% of ₹1,000 goal</p>
+        <p><span class="highlight">Rewards Earned:</span> 100 points</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback Modal -->
+  <div id="feedbackModal" class="modal" onclick="closeModal('feedbackModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <span class="modal-close" onclick="closeModal('feedbackModal')">×</span>
+      <div class="modal-title" id="fbTitle"></div>
+      <div class="modal-body" id="fbBody"></div>
+    </div>
+  </div>
+
+  <!-- ===================== NEW: Add Expense Modal ===================== -->
+  <div id="addExpenseModal" class="modal" onclick="closeModal('addExpenseModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <span class="modal-close" onclick="closeModal('addExpenseModal')">×</span>
+      <div class="modal-title">💰 Add Expense</div>
+      <div class="modal-body">
+        <form class="modal-form" onsubmit="return submitAddExpense(event)">
+          <label for="exp-amount">Amount (₹)</label>
+          <input id="exp-amount" type="number" min="0" step="1" required placeholder="Enter amount" />
+          <label for="exp-category">Category</label>
+          <select id="exp-category" required>
+            <option value="Food">Food</option>
+            <option value="Travel">Travel</option>
+            <option value="Books">Books</option>
+            <option value="Fees">Fees</option>
+            <option value="Other">Other</option>
+          </select>
+          <label for="exp-notes">Notes</label>
+          <textarea id="exp-notes" rows="2" placeholder="Optional notes"></textarea>
+          <button class="btn-primary" type="submit">Add Expense</button>
+          <button class="btn-secondary" type="button" onclick="closeModal('addExpenseModal')">Cancel</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== NEW: Split Bill Modal (with Contacts) ===================== -->
+  <div id="splitBillModal" class="modal" onclick="closeModal('splitBillModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <span class="modal-close" onclick="closeModal('splitBillModal')">×</span>
+      <div class="modal-title">🧾 Split Bill</div>
+      <div class="modal-body">
+        <form class="modal-form" onsubmit="return submitSplitBill(event)">
+          <label for="sb-desc">Description</label>
+          <input id="sb-desc" type="text" placeholder="e.g., Pizza night" required />
+          <div class="inline-row">
+            <div style="flex:1">
+              <label for="sb-total">Total Amount (₹)</label>
+              <input id="sb-total" type="number" min="0" step="1" required placeholder="Enter total" />
+            </div>
+            <div style="flex:1">
+              <label for="sb-split-type">Split</label>
+              <select id="sb-split-type">
+                <option value="equal">Equal</option>
+                <option value="custom">Custom shares</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Friend selection (inside Split Bill) -->
+          <label>Friends in this split</label>
+          <div id="selectedFriends" style="margin-bottom:6px;"></div>
+
+          <div class="inline-row">
+            <input id="sb-friend-input" type="text" placeholder="Add friend name" />
+            <button class="btn-secondary" type="button" onclick="addFriendManual()">Add</button>
+          </div>
+
+          <button class="btn-secondary" type="button" onclick="requestContacts()">+ Add from contacts</button>
+          <div id="contactsPanel" class="contacts-panel">
+            <p style="font-size:13px; color:#495057; margin-bottom:8px;">Select contacts to add:</p>
+            <div id="contactsList"></div>
+          </div>
+
+          <div id="customSharesArea" style="display:none; margin-top:8px;">
+            <p style="font-size:13px; color:#495057; margin-bottom:6px;">Enter custom shares (₹) for each friend:</p>
+            <div id="customSharesList"></div>
+          </div>
+
+          <button class="btn-primary" type="submit">Create Split</button>
+          <button class="btn-secondary" type="button" onclick="closeModal('splitBillModal')">Cancel</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== NEW: Lend / Borrow Modal ===================== -->
+  <div id="lendModal" class="modal" onclick="closeModal('lendModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <span class="modal-close" onclick="closeModal('lendModal')">×</span>
+      <div class="modal-title">🤝 Lend / Borrow</div>
+      <div class="modal-body">
+        <form class="modal-form" onsubmit="return submitLendBorrow(event)">
+          <div class="inline-row">
+            <div style="flex:1">
+              <label for="lb-type">Type</label>
+              <select id="lb-type">
+                <option value="lend">Lend</option>
+                <option value="borrow">Borrow</option>
+              </select>
+            </div>
+            <div style="flex:1">
+              <label for="lb-amount">Amount (₹)</label>
+              <input id="lb-amount" type="number" min="0" step="1" required placeholder="Enter amount" />
+            </div>
+          </div>
+          <label for="lb-person">Person</label>
+          <input id="lb-person" type="text" required placeholder="Friend name" />
+          <label for="lb-notes">Notes</label>
+          <textarea id="lb-notes" rows="2" placeholder="Optional notes"></textarea>
+          <button class="btn-primary" type="submit">Save</button>
+          <button class="btn-secondary" type="button" onclick="closeModal('lendModal')">Cancel</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ---------- Existing helpers ---------- */
+    function openModal(id) { document.getElementById(id).style.display='flex'; }
+    function closeModal(id) { document.getElementById(id).style.display='none'; }
+    function openTransactionDetail(id, amt, cat, time) {
+      document.getElementById('txnId').innerText = id;
+      document.getElementById('txnAmt').innerText = amt;
+      document.getElementById('txnCat').innerText = cat;
+      document.getElementById('txnTime').innerText = time;
+      openModal('txnModal');
+    }
+    function openFeedback(type) {
+      const title = document.getElementById('fbTitle'),
+            body = document.getElementById('fbBody');
+      if (type==='savings') {
+        title.innerHTML = '🎉 Savings Goal Achieved';
+        body.innerHTML = `
+          <p>You earned <b>100 points</b> for meeting your target.</p>
+          <ul>
+            <li>Keep up the momentum!</li>
+            <li>Next milestone: ₹1,500 saved.</li>
+          </ul>`;
+      }
+      if (type==='snacks') {
+        title.innerHTML = '🍎 Snack Saver Insights';
+        body.innerHTML = `
+          <p>You cut 5 snack trips → saved ₹600 this month!</p>
+          <p>👁️ <b>Eye Yoga:</b> 20-second palming to relax.</p>
+          <p>💡 <b>Fun Fact</b>: Dr. A.P.J. Abdul Kalam wrote poetry to unwind.</p>`;
+      }
+      if (type==='gift') {
+        title.innerHTML = '🎁 Gift Budget Tracker';
+        body.innerHTML = `
+          <p>Budget: ₹500 • Spent: ₹200 • Left: ₹300</p>
+          <p>🧘 <b>Exercise:</b> 2-minute wrist stretches post-study.</p>
+          <p>💡 <b>Quote</b>: "Dream, Dream, Dream." – A.P.J. Abdul Kalam</p>`;
+      }
+      openModal('feedbackModal');
+    }
+
+    /* ---------- New: Add Expense logic ---------- */
+    function submitAddExpense(e){
+      e.preventDefault();
+      const amt = document.getElementById('exp-amount').value;
+      const cat = document.getElementById('exp-category').value;
+      const notes = document.getElementById('exp-notes').value.trim();
+      // Here you would POST to backend and update UI lists.
+      alert(`Expense added: ₹${amt} • ${cat}${notes ? ' • ' + notes : ''}`);
+      closeModal('addExpenseModal');
+      return false;
+    }
+
+    /* ---------- New: Split Bill logic with contacts ---------- */
+    const selectedFriends = [];  // names
+    const sampleContacts = [
+      { name:'Priya Sharma', tel:'+91 9xxxxxx001' },
+      { name:'Arjun Patel',  tel:'+91 9xxxxxx002' },
+      { name:'Rahul Verma',  tel:'+91 9xxxxxx003' },
+      { name:'Ananya Iyer',  tel:'+91 9xxxxxx004' },
+    ];
+
+    function renderSelectedFriends(){
+      const wrap = document.getElementById('selectedFriends');
+      wrap.innerHTML = '';
+      selectedFriends.forEach((n, idx) => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.innerHTML = `${n} <button title="Remove" onclick="removeFriend(${idx})">×</button>`;
+        wrap.appendChild(chip);
+      });
+      renderCustomSharesIfNeeded();
+    }
+
+    function addFriendManual(){
+      const inp = document.getElementById('sb-friend-input');
+      const name = (inp.value || '').trim();
+      if(!name) return;
+      if(!selectedFriends.includes(name)) selectedFriends.push(name);
+      inp.value = '';
+      renderSelectedFriends();
+    }
+
+    function removeFriend(i){
+      selectedFriends.splice(i,1);
+      renderSelectedFriends();
+    }
+
+    function requestContacts(){
+      // Contact Picker API (progressive enhancement)
+      if (navigator.contacts && navigator.contacts.select) {
+        navigator.permissions?.query?.({ name:'contacts' }).catch(()=>({})).finally(async ()=>{
+          try{
+            const props = ['name','tel','email'];
+            const contacts = await navigator.contacts.select(props, {multiple:true});
+            (contacts || []).forEach(c=>{
+              const name = (c.name && c.name[0]) || (c.tel && c.tel[0]) || 'Friend';
+              if(name && !selectedFriends.includes(name)) selectedFriends.push(name);
+            });
+            renderSelectedFriends();
+          }catch(err){
+            // user denied or not supported -> fallback panel
+            toggleContactsPanel(true);
+            populateContactsFallback();
+          }
+        });
+      } else {
+        // Fallback panel since API not available
+        toggleContactsPanel(true);
+        populateContactsFallback();
+      }
+    }
+
+    function toggleContactsPanel(show){
+      const panel = document.getElementById('contactsPanel');
+      panel.style.display = show ? 'block' : 'none';
+    }
+
+    function populateContactsFallback(){
+      const list = document.getElementById('contactsList');
+      list.innerHTML = '';
+      sampleContacts.forEach(c=>{
+        const row = document.createElement('div');
+        row.className = 'contact-item';
+        row.innerHTML = `<div><strong>${c.name}</strong><br/><span style="font-size:12px;color:#6c757d">${c.tel}</span></div>`;
+        const btn = document.createElement('button');
+        btn.textContent = 'Add';
+        btn.onclick = ()=>{ if(!selectedFriends.includes(c.name)){ selectedFriends.push(c.name); renderSelectedFriends(); } };
+        row.appendChild(btn);
+        list.appendChild(row);
+      });
+    }
+
+    // Split type handling
+    document.addEventListener('change', (e)=>{
+      if(e.target && e.target.id === 'sb-split-type'){
+        const t = e.target.value;
+        document.getElementById('customSharesArea').style.display = (t==='custom') ? 'block' : 'none';
+        renderCustomSharesIfNeeded();
+      }
+    });
+
+    function renderCustomSharesIfNeeded(){
+      const type = document.getElementById('sb-split-type').value;
+      const area = document.getElementById('customSharesList');
+      if(type !== 'custom'){ area.innerHTML = ''; return; }
+      area.innerHTML = '';
+      selectedFriends.forEach((n, i)=>{
+        const row = document.createElement('div');
+        row.className = 'inline-row';
+        row.style.marginBottom = '6px';
+        row.innerHTML = `
+          <input type="text" value="${n}" disabled style="flex:1"/>
+          <input type="number" min="0" step="1" placeholder="₹ share" data-share-for="${n}" style="flex:1"/>
+        `;
+        area.appendChild(row);
+      });
+    }
+
+    function submitSplitBill(e){
+      e.preventDefault();
+      const desc = document.getElementById('sb-desc').value.trim();
+      const total = parseFloat(document.getElementById('sb-total').value || '0');
+      const splitType = document.getElementById('sb-split-type').value;
+
+      if(!desc || !total || total <= 0){
+        alert('Please enter a valid description and total amount.');
+        return false;
+      }
+      if(selectedFriends.length === 0){
+        alert('Please add at least one friend to split with.');
+        return false;
+      }
+
+      let breakdown = [];
+      if(splitType === 'equal'){
+        const per = Math.round((total / selectedFriends.length) * 100) / 100;
+        breakdown = selectedFriends.map(n => ({ name:n, amount:per }));
+      } else {
+        // Custom shares: read each input by data-share-for
+        const inputs = document.querySelectorAll('#customSharesList input[type="number"][data-share-for]');
+        let sum = 0;
+        breakdown = Array.from(inputs).map(inp=>{
+          const name = inp.getAttribute('data-share-for');
+          const amt = parseFloat(inp.value || '0');
+          sum += amt;
+          return { name, amount: amt };
+        });
+        if(Math.round(sum) !== Math.round(total)){
+          if(!confirm(`Custom shares total (₹${sum}) does not equal total (₹${total}). Proceed?`)){
+            return false;
+          }
+        }
+      }
+
+      // Here you'd persist to backend or local storage
+      const lines = breakdown.map(b => `${b.name}: ₹${b.amount}`).join('\n');
+      alert(`Split created for "${desc}" (₹${total})\n\n${lines}`);
+      // reset split state
+      selectedFriends.splice(0, selectedFriends.length);
+      renderSelectedFriends();
+      document.getElementById('sb-desc').value = '';
+      document.getElementById('sb-total').value = '';
+      document.getElementById('sb-split-type').value = 'equal';
+      document.getElementById('customSharesArea').style.display = 'none';
+      toggleContactsPanel(false);
+      closeModal('splitBillModal');
+      return false;
+    }
+
+    /* ---------- New: Lend / Borrow logic ---------- */
+    function submitLendBorrow(e){
+      e.preventDefault();
+      const type = document.getElementById('lb-type').value;
+      const amt = parseFloat(document.getElementById('lb-amount').value || '0');
+      const person = document.getElementById('lb-person').value.trim();
+      const notes = document.getElementById('lb-notes').value.trim();
+      if(!person || !amt || amt <= 0){
+        alert('Please enter a valid person and amount.');
+        return false;
+      }
+      alert(`${type === 'lend' ? 'Lending' : 'Borrowing'} ₹${amt} ${type==='lend'?'to':'from'} ${person}${notes ? ' • ' + notes : ''}`);
+      closeModal('lendModal');
+      return false;
+    }
+  </script>
+</body>
+</html>
